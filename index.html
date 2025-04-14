@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kronometre Uygulaması</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      font-family: Arial, sans-serif;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      color: orange;
+    }
+
+    .menu {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      background-color: orange;
+      border: none;
+      border-radius: 8px;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #ffb347;
+    }
+
+    .page {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 30px;
+    }
+
+    .active {
+      display: flex;
+    }
+
+    .circle-container {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin-bottom: 30px;
+    }
+
+    .glow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,165,0,0.6) 0%, transparent 70%);
+      z-index: 1;
+    }
+
+    .rotating-circle {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: 4px solid orange;
+      animation: rotate 60s linear infinite;
+      z-index: 2;
+      box-shadow: 0 0 10px orange;
+    }
+
+    .center-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 3;
+      font-size: 20px;
+      text-align: center;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .saat-container {
+      margin-top: 30px;
+      position: relative;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .music-container {
+      display: none;
+      background-color: rgba(255, 165, 0, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+
+    .music-button {
+      padding: 10px 20px;
+      margin: 5px;
+      background-color: #ff6347;
+      border: none;
+      border-radius: 8px;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .music-button:hover {
+      background-color: #ff4500;
+    }
+
+    .music-list button {
+      margin: 5px;
+      background-color: #ffeb3b;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .music-list button:hover {
+      background-color: #fdd835;
+    }
+
+    #customAlert {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #28a745;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 3px solid #dc3545;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    #customAlert button {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #customAlert button:hover {
+      background-color: #c82333;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>Ana Menü</h1>
+  <div class="menu">
+    <button onclick="showPage('kronometre')">Kronometre</button>
+    <button onclick="showPage('saat')">Saat</button>
+    <button onclick="showPage('skorlar')">Skorlar</button>
+    <button onclick="toggleMusicSelection()">Müzik Seç</button>
+  </div>
+
+  <div id="kronometre" class="page">
+    <h2>Kronometre</h2>
+    <div class="circle-container">
+      <div class="glow"></div>
+      <div class="rotating-circle"></div>
+      <div class="center-text">H|DEV~TA/STUDIOS</div>
+    </div>
+    <h1 id="display">00:00:00.000</h1>
+    <div>
+      <button onclick="start()">Başlat</button>
+      <button onclick="stop()">Duraklat</button>
+      <button onclick="reset()">Sıfırla</button>
+      <button onclick="kaydetSkor()">Skoru Kaydet</button>
+    </div>
+  </div>
+
+  <div id="saat" class="page">
+    <h2>Saat</h2>
+    <div class="saat-container">
+      <h1 id="clock">00:00:00</h1>
+    </div>
+  </div>
+
+  <div id="skorlar" class="page">
+    <h2>Skorlar</h2>
+    <div id="skorListesi"></div>
+  </div>
+
+  <div id="music" class="music-container">
+    <h3>Müzik Seç</h3>
+    <input type="file" id="musicInput" accept="audio/*" onchange="playMusicFromInput(event)" />
+    <p id="musicName"></p>
+    <button onclick="stopMusic()">Müziği Durdur</button>
+    <button onclick="resumeMusic()">Devam Ettir</button>
+  </div>
+
+  <div id="customAlert">
+    <p>Skor kaydedildi!</p>
+    <button onclick="kapatAlert()">Tamam</button>
+  </div>
+
+  <script>
+    let timer, ms = 0, running = false;
+    let musicPlayer = new Audio();
+
+    function updateDisplay() {
+      const totalSeconds = Math.floor(ms / 1000);
+      const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+      const secs = String(totalSeconds % 60).padStart(2, '0');
+      const milliseconds = String(ms % 1000).padStart(3, '0');
+      document.getElementById('display').innerText = `${hrs}:${mins}:${secs}.${milliseconds}`;
+    }
+
+    function start() {
+      if (!running) {
+        running = true;
+        timer = setInterval(() => {
+          ms += 10;
+          updateDisplay();
+        }, 10);
+      }
+    }
+
+    function stop() {
+      running = false;
+      clearInterval(timer);
+    }
+
+    function reset() {
+      stop();
+      ms = 0;
+      updateDisplay();
+    }
+
+    function kaydetSkor() {
+      const skor = document.getElementById('display').innerText;
+      let skorlar = JSON.parse(localStorage.getItem('skorlar') || '[]');
+      skorlar.unshift(skor);
+      if (skorlar.length > 10) skorlar = skorlar.slice(0, 10);
+      localStorage.setItem('skorlar', JSON.stringify(skorlar));
+      alert('Skor kaydedildi!');
+      document.getElementById('customAlert').style.display = 'block';
+    }
+
+    function showPage(id) {
+      document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      if (id === 'skorlar') skorGuncelle();
+    }
+
+    function skorGuncelle() {
+      const skorlar = JSON.parse(localStorage.getItem('skorlar') || '[]');
+      const container = document.getElementById('skorListesi');
+      container.innerHTML = '';
+      skorlar.forEach((skor, i) => {
+        const div = document.createElement('div');
+        div.className = 'skor-item';
+        div.innerHTML = `${i + 1}. ${skor} <button onclick="silSkor(${i})">Sil</button>`;
+        container.appendChild(div);
+      });
+    }
+
+    function silSkor(index) {
+      let skorlar = JSON.parse(localStorage.getItem('skorlar') || '[]');
+      skorlar.splice(index, 1);
+      localStorage.setItem('skorlar', JSON.stringify(skorlar));
+      skorGuncelle();
+    }
+
+    function saatGuncelle() {
+      const now = new Date();
+      document.getElementById('clock').innerText = now.toLocaleTimeString();
+    }
+
+    setInterval(saatGuncelle, 1000);
+    saatGuncelle();
+    updateDisplay();
+    showPage('kronometre');
+
+    function toggleMusicSelection() {
+      const musicContainer = document.getElementById('music');
+      musicContainer.style.display = (musicContainer.style.display === 'none' || musicContainer.style.display === '') ? 'block' : 'none';
+    }
+
+    function playMusicFromInput(event) {
+      const file = event.target.files[0];
+      if (file) {
+        musicPlayer.src = URL.createObjectURL(file);
+        musicPlayer.play();
+        document.getElementById('musicName').innerText = `Şu anda çalıyor: ${file.name}`;
+      }
+    }
+
+    function stopMusic() {
+      musicPlayer.pause();
+      musicPlayer.currentTime = 0;
+    }
+
+    function resumeMusic() {
+      if (musicPlayer.paused) {
+        musicPlayer.play();
+      }
+    }
+
+    function kapatAlert() {
+      document.getElementById('customAlert').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
